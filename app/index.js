@@ -11,6 +11,11 @@ let ready = false
 const CrashHerald = require('./crash-herald')
 const telemetry = require('./telemetry')
 
+const oldConsoleLog = console.log
+console.log = (dataToLog) => {
+  oldConsoleLog(new Date().getTime() + '] ', dataToLog)
+}
+
 // set initial base line checkpoint
 telemetry.setCheckpoint('init')
 
@@ -176,6 +181,7 @@ let loadAppStatePromise = SessionStore.loadAppState()
 
 // Some settings must be set right away on startup, those settings should be handled here.
 loadAppStatePromise.then((initialState) => {
+  console.log('init telemetry')
   telemetry.setCheckpointAndReport('state-loaded')
   const {HARDWARE_ACCELERATION_ENABLED, SMOOTH_SCROLL_ENABLED, SEND_CRASH_REPORTS} = require('../js/constants/settings')
   if (initialState.settings[HARDWARE_ACCELERATION_ENABLED] === false) {
@@ -214,6 +220,7 @@ const notifyCertError = (webContents, url, error, cert) => {
 }
 
 app.on('ready', () => {
+  console.log('app.on(ready)')
   let sessionStateSaveInterval = null
   app.on('certificate-error', (e, webContents, url, error, cert, resourceType, overridable, strictEnforcement, expiredPreviousDecision, cb) => {
     let host = urlParse(url).host
@@ -233,6 +240,7 @@ app.on('ready', () => {
   })
 
   app.on('window-all-closed', () => {
+    console.log('app.on(window-all-closed)')
     // On macOS it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') {
@@ -242,6 +250,7 @@ app.on('ready', () => {
   })
 
   app.on('before-quit', (e) => {
+    console.log('app.on(before-quit)')
     if (sessionStateStoreCompleteOnQuit) {
       return
     }
@@ -265,10 +274,12 @@ app.on('ready', () => {
   })
 
   app.on('network-connected', () => {
+    console.log('app.on(network-connected)')
     appActions.networkConnected()
   })
 
   app.on('network-disconnected', () => {
+    console.log('app.on(network-disconnected)')
     appActions.networkDisconnected()
   })
 
@@ -306,16 +317,27 @@ app.on('ready', () => {
     // TODO(bridiver) - this shold be refactored into reducers
     // DO NOT ADD ANYHING TO THIS LIST
     // See tabsReducer.js for app state init example
+    console.log('perWindowStateLoaded] contentSettings.init')
     contentSettings.init()
+    console.log('perWindowStateLoaded] privacy.init')
     privacy.init()
+    console.log('perWindowStateLoaded] Autofill.init')
     Autofill.init()
+    console.log('perWindowStateLoaded] Extensions.init')
     Extensions.init()
+    console.log('perWindowStateLoaded] SiteHacks.init')
     SiteHacks.init()
+    console.log('perWindowStateLoaded] spellCheck.init')
     spellCheck.init()
+    console.log('perWindowStateLoaded] HttpsEverywhere.init')
     HttpsEverywhere.init()
+    console.log('perWindowStateLoaded] TrackingProtection.init')
     TrackingProtection.init()
+    console.log('perWindowStateLoaded] AdBlock.init')
     AdBlock.init()
+    console.log('perWindowStateLoaded] AdInsertion.init')
     AdInsertion.init()
+    console.log('perWindowStateLoaded] init complete')
 
     if (!loadedPerWindowState || loadedPerWindowState.length === 0) {
       if (!CmdLine.newWindowURL()) {
@@ -439,6 +461,7 @@ app.on('ready', () => {
     // This loads package.json into an object
     // TODO: Seems like this can be done with app.getVersion() insteand?
     PackageLoader.load((err, pack) => {
+      console.log('PackageLoader.load')
       if (err) throw new Error('package.json could not be accessed')
 
       // Setup the auto updater, check the env variable first because it's
@@ -462,6 +485,7 @@ app.on('ready', () => {
       process.on(messages.EXPORT_BOOKMARKS, () => {
         BookmarksExporter.showDialog(AppStore.getState().get('sites'))
       })
+      console.log('PackageLoader.load] complete')
     })
     ready = true
   }

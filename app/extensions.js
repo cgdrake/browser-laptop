@@ -361,6 +361,7 @@ module.exports.init = () => {
   })
 
   process.on('extension-ready', (installInfo) => {
+    console.log('process.on(extension-ready)')
     installInfo = insertLocaleStrings(installInfo)
     extensionInfo.setState(installInfo.id, extensionStates.ENABLED)
     extensionInfo.setInstallInfo(installInfo.id, installInfo)
@@ -430,18 +431,45 @@ module.exports.init = () => {
   }
 
   let disableExtension = (extensionId) => {
+    console.log('disableExtension(' + getExtensionName(extensionId) + ')')
     session.defaultSession.extensions.disable(extensionId)
+  }
+
+  const getExtensionName = (extensionId) => {
+    switch (extensionId) {
+      case extensionIds[passwordManagers.ONE_PASSWORD]:
+        return '1Password'
+      case extensionIds[passwordManagers.DASHLANE]:
+        return 'Dashlane'
+      case extensionIds[passwordManagers.LAST_PASS]:
+        return 'LastPass'
+      case extensionIds[passwordManagers.BITWARDEN]:
+        return 'bitwarden'
+      case extensionIds[passwordManagers.ENPASS]:
+        return 'Enpass'
+      case config.PDFJSExtensionId:
+        return 'PDF.js'
+      case config.PocketExtensionId:
+        return 'Pocket'
+      case config.vimiumExtensionId:
+        return 'Vimium'
+      case config.widevineComponentId:
+        return 'widevine'
+    }
+    return undefined
   }
 
   let registerComponent = (extensionId) => {
     if (!extensionInfo.isRegistered(extensionId) && !extensionInfo.isRegistering(extensionId)) {
       extensionInfo.setState(extensionId, extensionStates.REGISTERING)
+      console.log('registerComponent(' + getExtensionName(extensionId) + '): componentUpdater.registerComponent')
       componentUpdater.registerComponent(extensionId)
     } else {
       const extensions = extensionState.getExtensions(appStore.getState())
       const extensionPath = extensions.getIn([extensionId, 'filePath'])
       if (extensionPath) {
         // Otheriwse just install it
+        console.log('registerComponent(' + getExtensionName(extensionId) + '): loadExtension')
         loadExtension(extensionId, extensionPath)
       }
     }
@@ -461,6 +489,7 @@ module.exports.init = () => {
   }
 
   let registerComponents = (diff) => {
+    console.log('registerComponents()')
     if (getSetting(settings.PDFJS_ENABLED)) {
       registerComponent(config.PDFJSExtensionId)
     } else {

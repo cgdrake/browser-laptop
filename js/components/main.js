@@ -362,10 +362,14 @@ class Main extends ImmutableComponent {
   }
 
   componentDidMount () {
+    console.log('componentDidMount] registerSwipeListener')
     this.registerSwipeListener()
+    console.log('componentDidMount] registerWindowLevelShortcuts')
     this.registerWindowLevelShortcuts()
+    console.log('componentDidMount] registerCustomTitlebarHandlers')
     this.registerCustomTitlebarHandlers()
 
+    console.log('componentDidMount] ipc.on handlers')
     ipc.on(messages.LEAVE_FULL_SCREEN, this.exitFullScreen.bind(this))
 
     ipc.on(messages.DEBUG_REACT_PROFILE, (e, args) => {
@@ -490,8 +494,10 @@ class Main extends ImmutableComponent {
       windowActions.setImportBrowserDataSelected({})
     })
 
+    console.log('componentDidMount] loadSearchProviders')
     this.loadSearchProviders()
 
+    console.log('componentDidMount] addEventListener')
     window.addEventListener('mousemove', (e) => {
       if (e.pageY !== this.pageY) {
         this.pageY = e.pageY
@@ -535,6 +541,8 @@ class Main extends ImmutableComponent {
     // Handlers for saving window state
     // TODO: revisit this code when window state moves to appStore
     const slidingTimerMilliseconds = 1000
+
+    console.log('componentDidMount] window state handlers')
 
     const onWindowResize = debounce(function (event) {
       const size = event.sender.getSize()

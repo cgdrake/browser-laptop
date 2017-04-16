@@ -387,13 +387,21 @@ const handleAppAction = (action) => {
       // DO NOT ADD TO THIS LIST
       // See tabsReducer.js for app state init example
       // TODO(bridiver) - these should be refactored into reducers
+      console.log('appStore] APP_SET_STATE] filtering.init')
       appState = filtering.init(appState, action, appStore)
+      console.log('appStore] APP_SET_STATE] basicAuth.init')
       appState = basicAuth.init(appState, action, appStore)
+      console.log('appStore] APP_SET_STATE] webtorrent.init')
       appState = webtorrent.init(appState, action, appStore)
+      console.log('appStore] APP_SET_STATE] profiles.init')
       appState = profiles.init(appState, action, appStore)
+      console.log('appStore] APP_SET_STATE] menu.init')
       appState = require('../../app/browser/menu').init(appState, action, appStore)
+      console.log('appStore] APP_SET_STATE] sync.init')
       appState = require('../../app/sync').init(appState, action, appStore)
+      console.log('appStore] APP_SET_STATE] ledger.init')
       ledger.init()
+      console.log('appStore] APP_SET_STATE] init complete')
       break
     case appConstants.APP_SHUTTING_DOWN:
       AppDispatcher.shutdown()

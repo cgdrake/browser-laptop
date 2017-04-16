@@ -516,11 +516,13 @@ module.exports.loadAppState = () => {
   return new Promise((resolve, reject) => {
     let data
     try {
+      console.log('sessionStore] read session file')
       data = fs.readFileSync(getStoragePath())
     } catch (e) {}
 
     let loaded = false
     try {
+      console.log('sessionStore] parse JSON')
       data = JSON.parse(data)
       loaded = true
     } catch (e) {
@@ -534,12 +536,15 @@ module.exports.loadAppState = () => {
     }
 
     if (loaded) {
+      console.log('sessionStore] runPreMigrations')
       data = module.exports.runPreMigrations(data)
 
       // Clean app data here if it wasn't cleared on shutdown
+      console.log('sessionStore] cleanAppData')
       if (data.cleanedOnShutdown !== true || data.lastAppVersion !== app.getVersion()) {
         data = module.exports.cleanAppData(data, false)
       }
+      console.log('sessionStore] merge defaultAppState')
       data = Object.assign(module.exports.defaultAppState(), data)
       data.cleanedOnShutdown = false
 
@@ -550,6 +555,7 @@ module.exports.loadAppState = () => {
         // The process always restarts after an update so if the state
         // indicates that a restart isn't wanted, close right away.
         if (updateStatus === UpdateStatus.UPDATE_APPLYING_NO_RESTART) {
+          console.log('sessionStore] saveAppState')
           module.exports.saveAppState(data, true).then(() => {
             // Exit immediately without doing the session store saving stuff
             // since we want the same state saved except for the update status
@@ -559,12 +565,16 @@ module.exports.loadAppState = () => {
         }
       }
 
+      console.log('sessionStore] runPostMigrations')
       data = module.exports.runPostMigrations(data)
     }
 
+    console.log('sessionStore] setVersionInformation')
     data = setVersionInformation(data)
 
+    console.log('sessionStore] locale.init')
     locale.init(data.settings[settings.LANGUAGE]).then((locale) => {
+      console.log('sessionStore] finished loadAppState')
       app.setLocale(locale)
       resolve(data)
     })
